@@ -64,6 +64,16 @@ DISABLE_TOOL_VALIDATION=false
 # Authentication
 ANTHROPIC_API_KEY=sk-ant-api03-...    # Optional: API key for SDK (uses CLI auth if omitted)
 
+# Codex execution (this build uses Codex CLI)
+CODEX_CLI_PATH=/opt/homebrew/bin/codex   # Optional path override
+CODEX_MODEL=                              # Optional model override
+CODEX_PROFILE=                            # Optional profile from ~/.codex/config.toml
+CODEX_USE_FULL_AUTO=true                  # Existing default behavior
+
+# Used when CODEX_USE_FULL_AUTO=false
+CODEX_SANDBOX_MODE=workspace-write        # read-only | workspace-write | danger-full-access
+CODEX_EXTRA_ARGS=                         # Extra shell-style flags appended to codex exec
+
 # Maximum conversation turns before requiring new session
 CLAUDE_MAX_TURNS=10
 

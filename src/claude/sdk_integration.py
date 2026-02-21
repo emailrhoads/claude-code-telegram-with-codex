@@ -264,10 +264,6 @@ class ClaudeSDKManager:
                 "--json",
                 "--skip-git-repo-check",
             ]
-            if self.config.codex_model:
-                cmd.extend(["-m", self.config.codex_model])
-            if self.config.sandbox_enabled:
-                cmd.extend(["--full-auto"])
             cmd.extend([session_id, prompt])
             return cmd
 
@@ -277,12 +273,25 @@ class ClaudeSDKManager:
             "--json",
             "--skip-git-repo-check",
         ]
-        if self.config.codex_model:
-            cmd.extend(["-m", self.config.codex_model])
-        if self.config.sandbox_enabled:
-            cmd.extend(["--full-auto"])
+        cmd.extend(self._build_common_codex_flags())
         cmd.append(prompt)
         return cmd
+
+    def _build_common_codex_flags(self) -> List[str]:
+        """Build Codex flags used for new turns (`codex exec`)."""
+        flags: List[str] = []
+        if self.config.codex_model:
+            flags.extend(["-m", self.config.codex_model])
+        if self.config.codex_profile:
+            flags.extend(["--profile", self.config.codex_profile])
+        if self.config.sandbox_enabled:
+            if self.config.codex_use_full_auto:
+                flags.append("--full-auto")
+            else:
+                flags.extend(["--sandbox", self.config.codex_sandbox_mode])
+        if self.config.codex_extra_args:
+            flags.extend(self.config.codex_extra_args)
+        return flags
 
     @staticmethod
     def _parse_json_event(line: str) -> Optional[Dict[str, Any]]:

@@ -84,6 +84,29 @@ class TestCodexCommandBuild:
         ]
         assert cmd[-2:] == ["thread-1", "continue"]
 
+    def test_build_resume_command_ignores_exec_only_flags(self, manager):
+        manager.config.codex_use_full_auto = False
+        manager.config.codex_sandbox_mode = "workspace-write"
+        manager.config.codex_model = "gpt-5"
+        manager.config.codex_profile = "test-profile"
+        manager.config.codex_extra_args = ["--sandbox", "danger-full-access"]
+
+        cmd = manager._build_codex_command(
+            prompt="continue",
+            session_id="thread-1",
+            continue_session=True,
+        )
+
+        assert cmd == [
+            "/usr/local/bin/codex",
+            "exec",
+            "resume",
+            "--json",
+            "--skip-git-repo-check",
+            "thread-1",
+            "continue",
+        ]
+
 
 class TestExecuteCommand:
     async def test_execute_success_and_streaming(self, manager):

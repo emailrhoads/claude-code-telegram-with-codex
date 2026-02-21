@@ -230,6 +230,10 @@ ALLOWED_USERS=123456789          # Comma-separated Telegram user IDs
 # Codex
 CODEX_CLI_PATH=/usr/local/bin/codex  # Optional if codex is already on PATH
 CODEX_MODEL=                         # Optional model override
+CODEX_PROFILE=                       # Optional profile from ~/.codex/config.toml
+CODEX_USE_FULL_AUTO=true             # Default behavior (on-request + workspace-write)
+CODEX_SANDBOX_MODE=workspace-write   # Used when CODEX_USE_FULL_AUTO=false
+CODEX_EXTRA_ARGS=                    # Optional extra codex exec flags
 CLAUDE_MAX_COST_PER_USER=10.0    # Spending limit per user (USD)
 CLAUDE_TIMEOUT_SECONDS=300       # Operation timeout
 

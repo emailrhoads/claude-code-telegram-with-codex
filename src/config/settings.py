@@ -9,6 +9,7 @@ Features:
 """
 
 import json
+import shlex
 from pathlib import Path
 from typing import Any, List, Literal, Optional
 
@@ -80,6 +81,32 @@ class Settings(BaseSettings):
     )
     codex_model: Optional[str] = Field(
         None, description="Codex model to use (optional)"
+    )
+    codex_profile: Optional[str] = Field(
+        None, description="Codex profile name from ~/.codex/config.toml"
+    )
+    codex_sandbox_mode: Literal[
+        "read-only", "workspace-write", "danger-full-access"
+    ] = Field(
+        "workspace-write",
+        description=(
+            "Codex sandbox mode passed to `codex exec --sandbox` when "
+            "codex_use_full_auto is false"
+        ),
+    )
+    codex_use_full_auto: bool = Field(
+        True,
+        description=(
+            "Use Codex --full-auto convenience mode. "
+            "Set false to control sandbox/profile/extra args explicitly."
+        ),
+    )
+    codex_extra_args: Optional[List[str]] = Field(
+        default=[],
+        description=(
+            "Extra flags appended to codex exec commands. "
+            "Accepts a shell-style string or list."
+        ),
     )
     claude_max_turns: int = Field(
         DEFAULT_CLAUDE_MAX_TURNS, description="Max conversation turns"
@@ -253,6 +280,21 @@ class Settings(BaseSettings):
             return [tool.strip() for tool in v.split(",") if tool.strip()]
         if isinstance(v, list):
             return [str(tool) for tool in v]
+        return v  # type: ignore[no-any-return]
+
+    @field_validator("codex_extra_args", mode="before")
+    @classmethod
+    def parse_codex_extra_args(cls, v: Any) -> Optional[List[str]]:
+        """Parse extra Codex args from a shell-style string or list."""
+        if v is None:
+            return []
+        if isinstance(v, str):
+            value = v.strip()
+            if not value:
+                return []
+            return shlex.split(value)
+        if isinstance(v, list):
+            return [str(arg) for arg in v]
         return v  # type: ignore[no-any-return]
 
     @field_validator("approved_directory")
