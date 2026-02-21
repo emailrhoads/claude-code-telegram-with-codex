@@ -68,12 +68,18 @@ class Settings(BaseSettings):
     claude_cli_path: Optional[str] = Field(
         None, description="Path to Claude CLI executable"
     )
+    codex_cli_path: Optional[str] = Field(
+        None, description="Path to Codex CLI executable"
+    )
     anthropic_api_key: Optional[SecretStr] = Field(
         None,
         description="Anthropic API key for SDK (optional if CLI logged in)",
     )
     claude_model: str = Field(
         "claude-3-5-sonnet-20241022", description="Claude model to use"
+    )
+    codex_model: Optional[str] = Field(
+        None, description="Codex model to use (optional)"
     )
     claude_max_turns: int = Field(
         DEFAULT_CLAUDE_MAX_TURNS, description="Max conversation turns"

@@ -144,8 +144,8 @@ async def create_application(config: Settings) -> Dict[str, Any]:
         config, security_validator, agentic_mode=config.agentic_mode
     )
 
-    # Create Claude SDK manager and integration facade
-    logger.info("Using Claude Python SDK integration")
+    # Create Codex CLI manager and integration facade
+    logger.info("Using Codex CLI integration")
     sdk_manager = ClaudeSDKManager(config)
 
     claude_integration = ClaudeIntegration(

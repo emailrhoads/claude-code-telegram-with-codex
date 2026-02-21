@@ -34,7 +34,7 @@ Bot: Running pytest...
 ### 1. Prerequisites
 
 - **Python 3.11+** -- [Download here](https://www.python.org/downloads/)
-- **Claude Code CLI** -- [Install from here](https://claude.ai/code)
+- **Codex CLI** -- Install Codex and run `codex login`
 - **Telegram Bot Token** -- Get one from [@BotFather](https://t.me/botfather)
 
 ### 2. Install
@@ -157,7 +157,7 @@ Use `/repo` to list cloned repos in your workspace, or `/repo <name>` to switch 
 
 Set `AGENTIC_MODE=false` to enable the full 13-command terminal-like interface with directory navigation, inline keyboards, quick actions, git integration, and session export.
 
-**Commands:** `/start`, `/help`, `/new`, `/continue`, `/end`, `/status`, `/cd`, `/ls`, `/pwd`, `/projects`, `/export`, `/actions`, `/git`  
+**Commands:** `/start`, `/help`, `/new`, `/continue`, `/end`, `/status`, `/cd`, `/ls`, `/pwd`, `/projects`, `/export`, `/actions`, `/git`
 If `ENABLE_PROJECT_THREADS=true`: `/sync_threads`
 
 ```
@@ -227,8 +227,9 @@ ALLOWED_USERS=123456789          # Comma-separated Telegram user IDs
 ### Common Options
 
 ```bash
-# Claude
-ANTHROPIC_API_KEY=sk-ant-...     # API key (optional if using CLI auth)
+# Codex
+CODEX_CLI_PATH=/usr/local/bin/codex  # Optional if codex is already on PATH
+CODEX_MODEL=                         # Optional model override
 CLAUDE_MAX_COST_PER_USER=10.0    # Spending limit per user (USD)
 CLAUDE_TIMEOUT_SECONDS=300       # Operation timeout
 
@@ -296,12 +297,13 @@ Message [@userinfobot](https://t.me/userinfobot) on Telegram -- it will reply wi
 **Bot doesn't respond:**
 - Check your `TELEGRAM_BOT_TOKEN` is correct
 - Verify your user ID is in `ALLOWED_USERS`
-- Ensure Claude Code CLI is installed and accessible
+- Ensure Codex CLI is installed and accessible
 - Check bot logs with `make run-debug`
 
-**Claude integration not working:**
-- SDK mode (default): Check `claude auth status` or verify `ANTHROPIC_API_KEY`
-- CLI mode: Verify `claude --version` and `claude auth status`
+**Codex integration not working:**
+- Check `codex --version`
+- Run `codex login`
+- If needed, set `CODEX_CLI_PATH` explicitly
 - Check `CLAUDE_ALLOWED_TOOLS` includes necessary tools (see [docs/tools.md](docs/tools.md) for the full reference)
 
 **High usage costs:**
