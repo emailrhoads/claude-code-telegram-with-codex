@@ -27,6 +27,7 @@ from ..claude.sdk_integration import StreamUpdate
 from ..config.settings import Settings
 from ..projects import PrivateTopicsUnavailableError
 from .utils.html_format import escape_html
+from .utils.image_attachments import send_recent_generated_images
 
 logger = structlog.get_logger()
 
@@ -741,6 +742,7 @@ class MessageOrchestrator:
         heartbeat = self._start_typing_heartbeat(chat)
 
         success = True
+        run_started_at = time.time()
         try:
             claude_response = await claude_integration.run_command(
                 prompt=message_text,
@@ -843,6 +845,19 @@ class MessageOrchestrator:
                         ),
                     )
 
+        try:
+            await send_recent_generated_images(
+                message=update.message,
+                working_directory=current_dir,
+                started_at_ts=run_started_at,
+            )
+        except Exception as e:
+            logger.warning(
+                "Failed to send generated images in agentic text flow",
+                error=str(e),
+                user_id=user_id,
+            )
+
         # Audit log
         audit_logger = context.bot_data.get("audit_logger")
         if audit_logger:
@@ -944,6 +959,7 @@ class MessageOrchestrator:
         )
 
         heartbeat = self._start_typing_heartbeat(chat)
+        run_started_at = time.time()
         try:
             claude_response = await claude_integration.run_command(
                 prompt=prompt,
@@ -983,6 +999,19 @@ class MessageOrchestrator:
                 )
                 if i < len(formatted_messages) - 1:
                     await asyncio.sleep(0.5)
+
+            try:
+                await send_recent_generated_images(
+                    message=update.message,
+                    working_directory=current_dir,
+                    started_at_ts=run_started_at,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Failed to send generated images in agentic document flow",
+                    error=str(e),
+                    user_id=user_id,
+                )
 
         except Exception as e:
             from .handlers.message import _format_error_message
@@ -1038,6 +1067,7 @@ class MessageOrchestrator:
             )
 
             heartbeat = self._start_typing_heartbeat(chat)
+            run_started_at = time.time()
             try:
                 claude_response = await claude_integration.run_command(
                     prompt=processed_image.prompt,
@@ -1073,6 +1103,19 @@ class MessageOrchestrator:
                 )
                 if i < len(formatted_messages) - 1:
                     await asyncio.sleep(0.5)
+
+            try:
+                await send_recent_generated_images(
+                    message=update.message,
+                    working_directory=current_dir,
+                    started_at_ts=run_started_at,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Failed to send generated images in agentic photo flow",
+                    error=str(e),
+                    user_id=user_id,
+                )
 
         except Exception as e:
             from .handlers.message import _format_error_message

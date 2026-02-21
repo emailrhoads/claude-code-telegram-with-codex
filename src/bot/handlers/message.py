@@ -1,6 +1,7 @@
 """Message handlers for non-command inputs."""
 
 import asyncio
+import time
 from typing import Optional
 
 import structlog
@@ -21,6 +22,7 @@ from ...security.audit import AuditLogger
 from ...security.rate_limiter import RateLimiter
 from ...security.validators import SecurityValidator
 from ..utils.html_format import escape_html
+from ..utils.image_attachments import send_recent_generated_images
 
 logger = structlog.get_logger()
 
@@ -361,6 +363,7 @@ async def handle_text_message(
                 logger.warning("Failed to update progress message", error=str(e))
 
         # Run Claude command
+        run_started_at = time.time()
         try:
             claude_response = await claude_integration.run_command(
                 prompt=message_text,
@@ -465,6 +468,19 @@ async def handle_text_message(
                             update.message.message_id if i == 0 else None
                         ),
                     )
+
+        try:
+            await send_recent_generated_images(
+                message=update.message,
+                working_directory=current_dir,
+                started_at_ts=run_started_at,
+            )
+        except Exception as e:
+            logger.warning(
+                "Failed to send generated images in classic text flow",
+                error=str(e),
+                user_id=user_id,
+            )
 
         # Update session info
         context.user_data["last_message"] = update.message.text
@@ -703,6 +719,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         session_id = context.user_data.get("claude_session_id")
 
         # Process with Claude
+        run_started_at = time.time()
         try:
             claude_response = await claude_integration.run_command(
                 prompt=prompt,
@@ -741,6 +758,19 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
                 if i < len(formatted_messages) - 1:
                     await asyncio.sleep(0.5)
+
+            try:
+                await send_recent_generated_images(
+                    message=update.message,
+                    working_directory=current_dir,
+                    started_at_ts=run_started_at,
+                )
+            except Exception as e:
+                logger.warning(
+                    "Failed to send generated images in classic document flow",
+                    error=str(e),
+                    user_id=user_id,
+                )
 
         except Exception as e:
             await claude_progress_msg.edit_text(
@@ -830,6 +860,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             session_id = context.user_data.get("claude_session_id")
 
             # Process with Claude
+            run_started_at = time.time()
             try:
                 claude_response = await claude_integration.run_command(
                     prompt=processed_image.prompt,
@@ -865,6 +896,19 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
                     if i < len(formatted_messages) - 1:
                         await asyncio.sleep(0.5)
+
+                try:
+                    await send_recent_generated_images(
+                        message=update.message,
+                        working_directory=current_dir,
+                        started_at_ts=run_started_at,
+                    )
+                except Exception as e:
+                    logger.warning(
+                        "Failed to send generated images in classic photo flow",
+                        error=str(e),
+                        user_id=user_id,
+                    )
 
             except Exception as e:
                 await claude_progress_msg.edit_text(

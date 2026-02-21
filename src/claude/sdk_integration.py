@@ -264,6 +264,7 @@ class ClaudeSDKManager:
                 "--json",
                 "--skip-git-repo-check",
             ]
+            cmd.extend(self._build_resume_codex_flags())
             cmd.extend([session_id, prompt])
             return cmd
 
@@ -291,6 +292,21 @@ class ClaudeSDKManager:
                 flags.extend(["--sandbox", self.config.codex_sandbox_mode])
         if self.config.codex_extra_args:
             flags.extend(self.config.codex_extra_args)
+        return flags
+
+    def _build_resume_codex_flags(self) -> List[str]:
+        """Build Codex flags that are valid for `codex exec resume`."""
+        flags: List[str] = []
+
+        # Keep resume behavior aligned with explicit danger-full-access config.
+        # `resume` does not support `--sandbox`, so use the supported bypass flag.
+        if (
+            self.config.sandbox_enabled
+            and not self.config.codex_use_full_auto
+            and self.config.codex_sandbox_mode == "danger-full-access"
+        ):
+            flags.append("--dangerously-bypass-approvals-and-sandbox")
+
         return flags
 
     @staticmethod
